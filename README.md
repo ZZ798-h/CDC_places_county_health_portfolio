@@ -94,4 +94,4 @@ CDC_places_county_health_portfolio/
 
 ## Notes
 
-This repository is organized as a portfolio version of a public health data workflow. Course-specific files, grading checklists, and internal submission documents are not included.
+This repository is organized as a portfolio version of a public health data workflow.
