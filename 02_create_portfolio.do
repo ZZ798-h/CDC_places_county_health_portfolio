@@ -77,3 +77,4 @@ save "./processed/repeated_top20_risk_counties.dta", replace
 /*---------------------*/
 /*the top 5 health outcomes(e.g.,Diabetes, COPD, Obesity, Depression, etc.) of each county */
 
+tab counties, sort
