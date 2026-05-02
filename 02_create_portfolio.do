@@ -1,6 +1,14 @@
+capture restore
+capture erase "$output/FAB_file.xlsx"
+
 cd "/Users/zhaozhan/GitHub/CDC_places_county_health_portfolio/01 Data"
 
-use "./processed/places_2025_county01.dta",clear
+global project "/Users/zhaozhan/GitHub/CDC_places_county_health_portfolio"
+global raw "$project/01 Data/raw"
+global processed "$project/01 Data/processed"
+global output "$project/02 Output"
+
+use "$processed/places_2025_county01.dta",clear
 /* The Excel Portfolio: */
 snapshot save
 
@@ -29,52 +37,59 @@ foreach x in `healthbr' {
 	name(bar_`x',replace) ///
 	title("`x'") ///
 	ytitle("Mean prevalence(%)")
-	graph export "../02 Output/bar_`x'.png",replace
-	putexcel B3 =image("../02 Output/bar_`x'.png")
+	graph export "$output/bar_`x'.png",replace
+	putexcel B3 =image("$output/bar_`x'.png")
 	restore
 }
 
 
 /* Health Outcomes */
+/*----------------------*/
+/* The dataset is now ready for the next step: creating the Excel Portfolio 3. */
 
-snapshot restore 1
+use "$processed/places_2025_county01.dta",clear
+preserve
+	keep if data_value_type == "Age-adjusted prevalence"
 
-keep if data_value_type == "Age-adjusted prevalence"
+	gsort measureid -data_value 
+	by measureid: gen rank = _n
+	keep if rank <= 20
 
-tempfile top20_all
-save `top20_all', emptyok replace
 
-levelsof measureid, local(healthot)
-
-foreach y in `healthot' {
-	preserve
+	bysort counties: gen repeated_count = _N
+	drop if repeated_count == 1
 	
-		keep if measureid == "`y'"
-		
-		gsort -data_value
-		gen risk_rank = _n
-		keep if risk_rank <=20
-		
-		append using `top20_all'
-		save `top20_all',replace
-		
-	restore		
-}
+	duplicates drop counties, force
 
-use `top20_all',clear
+	tempfile selected_counties
+	save `selected_counties', replace
+restore
 
-*identify counties appearing more than one among top 20 risk behavior lists
+use "$processed/places_2025_county.dta",clear
+egen counties = concat(locationname stateabbr), punct("-")
 
-bysort counties: gen repeat_count = _N
-keep if repeat_count >1
+sort counties measureid data_value
+merge m:1 counties using `selected_counties'
+keep if _merge == 3	
 
-sort counties measureid
+keep if category == "Health Outcomes" & data_value_type == "Age-adjusted prevalence"
 
-order counties locationname stateabbr measureid measure data_value risk_rank repeat_count
-
-save "./processed/repeated_top20_risk_counties.dta", replace
+gsort counties -data_value 
+by counties: gen rank_top5 = _n
+keep if rank_top5 <= 5
 
 /*---------------------*/
-/*the top 5 health outcomes(e.g.,Diabetes, COPD, Obesity, Depression, etc.) of each county */
 
-tab counties, sort
+bysort measure: gen outcome_frequency = _N
+
+gen prevalence_percent= data_value
+format prevalence_percent %9.1f
+
+sort counties rank_top5
+
+keep counties rank_top5 measure measureid prevalence_percent outcome_frequency
+order counties rank_top5 measure measureid prevalence_percent outcome_frequency
+
+export excel using "$output/FAB_file.xlsx", ///
+sheet("Top  5 Outcomes") ///
+firstrow(variables) sheetreplace
