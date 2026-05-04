@@ -16,13 +16,25 @@ version 18
 clear all
 set more off
 
+
+
 * Set project directory
 
-cd "/Users/zhaozhan/GitHub/CDC_places_county_health_portfolio/"
+global project "/Users/zhaozhan/GitHub/CDC_places_county_health_portfolio/"
+global raw "$project/01 Data/raw"
+global processed "$project/01 Data/processed"
+global output "$project/02 Output"
+
+cd "$project"
+
+
+capture mkdir "$raw"
+capture mkdir "$processed"
+capture mkdir "$output"
 
 * Run project do-files
 
 do "01_clean_places.do"
 
-/*cd "/Users/zhaozhan/Zhan_Zhao_FAB"*/
 do "02_create_portfolio.do"
+

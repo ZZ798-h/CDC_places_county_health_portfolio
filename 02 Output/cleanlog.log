@@ -1,0 +1,354 @@
+------------------------------------------------------------
+      name:  cleanlog
+       log:  /Users/zhaozhan/GitHub/CDC_places_county_health
+> _portfolio//02 Output/cleanlog.log
+  log type:  text
+ opened on:   3 May 2026, 20:06:11
+
+. 
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 1. Import raw CDC PLACES county dataset"
+Step 1. Import raw CDC PLACES county dataset
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. 
+. import delimited "$raw/PLACES__Local_Data_for_Better_Healt
+> h,_County_Data,_2025_release_20260407.csv", clear
+(encoding automatically selected: ISO-8859-1)
+(22 vars, 229,298 obs)
+
+. 
+. 
+. count
+  229,298
+
+. 
+. display "Number of observations in raw dataset: " r(N)
+Number of observations in raw dataset: 229298
+
+. 
+. display "Checking required variables:"
+Checking required variables:
+
+. 
+. foreach x of varlist category measure data_value_type ///
+>         data_value locationname stateabbr measureid {
+  2.         
+.         display "required `x' variable is present."
+  3.         
+. }
+required category variable is present.
+required measure variable is present.
+required data_value_type variable is present.
+required data_value variable is present.
+required locationname variable is present.
+required stateabbr variable is present.
+required measureid variable is present.
+
+. display "All required variables are present."
+All required variables are present.
+
+. 
+. display "Distribution of category:"
+Distribution of category:
+
+. tab category
+
+                   Category |      Freq.     Percent        
+> Cum.
+----------------------------+-------------------------------
+> ----
+                 Disability |     41,412       18.06       1
+> 8.06
+            Health Outcomes |     71,366       31.12       4
+> 9.18
+      Health Risk Behaviors |     24,038       10.48       5
+> 9.67
+              Health Status |     17,748        7.74       6
+> 7.41
+Health-Related Social Needs |     32,200       14.04       8
+> 1.45
+                 Prevention |     42,534       18.55      10
+> 0.00
+----------------------------+-------------------------------
+> ----
+                      Total |    229,298      100.00
+
+. 
+. display "Distribution of data_value_type:"
+Distribution of data_value_type:
+
+. tab data_value_type
+
+        Data_Value_Type |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+Age-adjusted prevalence |    114,649       50.00       50.00
+       Crude prevalence |    114,649       50.00      100.00
+------------------------+-----------------------------------
+                  Total |    229,298      100.00
+
+. 
+. save "$processed/places_2025_county.dta", replace
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//01 Data/processed/places_2025_county.dta saved
+
+. 
+. 
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 2. Retain four required health risk behavior
+>  measures"
+Step 2. Retain four required health risk behavior measures
+
+. display "=================================================
+> ==========="
+============================================================
+
+. /* 
+> Use the variables 'category' and 'measure' to isolate the 
+> 4 measured health risk behaviors : 
+>  a. Binge drinking among adults
+>  b. Current cigarette somking among adults
+>  c. No leisure-time physical activity among adults
+>  d. short sleep duration among adults
+> */
+. 
+. keep if category == "Health Risk Behaviors"& ///
+>         ( measure =="Binge drinking among adults" /// 
+>         | measure =="Current cigarette smoking among adult
+> s" ///
+>         | measure =="No leisure-time physical activity amo
+> ng adults" ///
+>         | measure =="Short sleep duration among adults" //
+> /
+> )
+(205,260 observations deleted)
+
+. 
+. count
+  24,038
+
+. display "Observations after filtering four risk behavior m
+> easures: " r(N)
+Observations after filtering four risk behavior measures: 24
+> 038
+
+. 
+. 
+. 
+. display "Selected health risk behavior measures:"
+Selected health risk behavior measures:
+
+. tab measure
+
+                                Measure |      Freq.     Per
+> cent        Cum.
+----------------------------------------+-------------------
+> ----------------
+            Binge drinking among adults |      5,916       2
+> 4.61       24.61
+ Current cigarette smoking among adults |      5,916       2
+> 4.61       49.22
+No leisure-time physical activity amo.. |      5,916       2
+> 4.61       73.83
+      Short sleep duration among adults |      6,290       2
+> 6.17      100.00
+----------------------------------------+-------------------
+> ----------------
+                                  Total |     24,038      10
+> 0.00
+
+. 
+. display "Selected measure IDs:"
+Selected measure IDs:
+
+. tab measureid
+
+   MeasureId |      Freq.     Percent        Cum.
+-------------+-----------------------------------
+       BINGE |      5,916       24.61       24.61
+    CSMOKING |      5,916       24.61       49.22
+         LPA |      5,916       24.61       73.83
+       SLEEP |      6,290       26.17      100.00
+-------------+-----------------------------------
+       Total |     24,038      100.00
+
+. 
+. /* Label the counties by its name concatenated with its st
+> ate abbreviation*/
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 3. Create county-state label"
+Step 3. Create county-state label
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. egen counties = concat(locationname stateabbr), punct("-")
+
+. label variable counties "County name concatenated with sta
+> te abbreviation"
+
+. 
+. display "Examples of county-state labels:"
+Examples of county-state labels:
+
+. list locationname stateabbr counties in 1/10, noobs
+
+  +---------------------------------------+
+  | location~e   statea~r        counties |
+  |---------------------------------------|
+  |     Barber         KS       Barber-KS |
+  |    Jackson         MN      Jackson-MN |
+  |      Adams         ND        Adams-ND |
+  |     Fulton         OH       Fulton-OH |
+  |      Rains         TX        Rains-TX |
+  |---------------------------------------|
+  |    Calhoun         AL      Calhoun-AL |
+  |       Kern         CA         Kern-CA |
+  |    Johnson         AR      Johnson-AR |
+  |     Mohave         AZ       Mohave-AZ |
+  | Dillingham         AK   Dillingham-AK |
+  +---------------------------------------+
+
+. codebook counties
+
+------------------------------------------------------------
+counties    County name concatenated with state abbreviation
+------------------------------------------------------------
+
+                  Type: String (str34), but longest is str33
+
+         Unique values: 3,139                     Missing ""
+> : 0/24,038
+
+              Examples: "Coos-NH"
+                        "Hickory-MO"
+                        "Merced-CA"
+                        "Sandusky-OH"
+
+               Warning: Variable has embedded blanks.
+
+. 
+. 
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 4. Save cleaned intermediate dataset"
+Step 4. Save cleaned intermediate dataset
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. describe
+
+Contains data from /Users/zhaozhan/GitHub/CDC_places_county_
+> health_portfolio//01 Data/processed/places_2025_county.dta
+ Observations:        24,038                  
+    Variables:            23                  3 May 2026 20:
+> 06
+------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------
+year            int     %8.0g                 Year
+stateabbr       str2    %9s                   StateAbbr
+statedesc       str20   %20s                  StateDesc
+locationname    str30   %30s                  LocationName
+datasource      str5    %9s                   DataSource
+category        str27   %27s                  Category
+measure         str84   %84s                  Measure
+data_value_unit str1    %9s                   Data_Value_Uni
+                                        > t
+data_value_type str23   %23s                  Data_Value_Typ
+                                        > e
+data_value      float   %9.0g                 Data_Value
+data_value_fo~l str1    %9s                   Data_Value_Foo
+                                        > tnote_Symbol
+data_value_fo~e str48   %48s                  Data_Value_Foo
+                                        > tnote
+low_confidenc~t float   %9.0g                 Low_Confidence
+                                        > _Limit
+high_confiden~t float   %9.0g                 High_Confidenc
+                                        > e_Limit
+totalpopulation str11   %11s                  TotalPopulatio
+                                        > n
+totalpop18plus  str11   %11s                  TotalPop18plus
+locationid      long    %12.0g                LocationID
+categoryid      str8    %9s                   CategoryID
+measureid       str12   %12s                  MeasureId
+datavaluetypeid str9    %9s                   DataValueTypeI
+                                        > D
+short_questio~t str32   %32s                  Short_Question
+                                        > _Text
+geolocation     str42   %42s                  Geolocation
+counties        str34   %34s                  County name
+                                        concatenated with
+                                        state abbreviation
+------------------------------------------------------------
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. count
+  24,038
+
+. display "Final number of observations in cleaned dataset: 
+> " r(N)
+Final number of observations in cleaned dataset: 24038
+
+. 
+. save "$processed/places_2025_county01.dta", replace
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//01 Data/processed/places_2025_county01.dta
+    saved
+
+. display "Cleaned dataset saved successfully:"
+Cleaned dataset saved successfully:
+
+. display "$processed/places_2025_county01.dta"
+/Users/zhaozhan/GitHub/CDC_places_county_health_portfolio//0
+> 1 Data/processed/places_2025_county01.dta
+
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Cleaning workflow completed successfully."
+Cleaning workflow completed successfully.
+
+. display "Next step: Run 02_create_portfolio.do."
+Next step: Run 02_create_portfolio.do.
+
+. display "=================================================
+> ==========="
+============================================================
+
+. log close cleanlog
+      name:  cleanlog
+       log:  /Users/zhaozhan/GitHub/CDC_places_county_health
+> _portfolio//02 Output/cleanlog.log
+  log type:  text
+ closed on:   3 May 2026, 20:06:14
+------------------------------------------------------------

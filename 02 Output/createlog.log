@@ -1,0 +1,693 @@
+------------------------------------------------------------
+      name:  createlog
+       log:  /Users/zhaozhan/GitHub/CDC_places_county_health
+> _portfolio//02 Output/createlog.log
+  log type:  text
+ opened on:   3 May 2026, 20:06:14
+
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "PH 272 FAB - Excel Portfolio Creation"
+PH 272 FAB - Excel Portfolio Creation
+
+. display "Do-file: 02_create_portfolio.do"
+Do-file: 02_create_portfolio.do
+
+. display "Student: Zhan Zhao"
+Student: Zhan Zhao
+
+. display "Purpose: Create formatted Excel portfolio with pl
+> ots and tables."
+Purpose: Create formatted Excel portfolio with plots and tab
+> les.
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. capture restore
+
+. capture erase "$output/FAB_file.xlsx"
+
+. 
+. use "$processed/places_2025_county01.dta",clear
+
+. /* The Excel Portfolio: */
+. snapshot save
+snapshot 4 created at 3 May 2026 20:06
+
+. 
+. 
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 1. Keep age-adjusted prevalence records"
+Step 1. Keep age-adjusted prevalence records
+
+. display "=================================================
+> ==========="
+============================================================
+
+. /*
+> centile data_value , centile (80)
+> *Report centile and confidence interval
+> 
+> g flag =1 if data_value>34.8
+> replace flag = 0 if flag == .
+> */
+. 
+. keep if data_value_type == "Age-adjusted prevalence"
+(12,019 observations deleted)
+
+. 
+. count
+  12,019
+
+. display "Age-adjusted prevalence observations retained: " 
+> r(N)
+Age-adjusted prevalence observations retained: 12019
+
+. 
+. display "Risk behavior measures available:"
+Risk behavior measures available:
+
+. tab measureid
+
+   MeasureId |      Freq.     Percent        Cum.
+-------------+-----------------------------------
+       BINGE |      2,958       24.61       24.61
+    CSMOKING |      2,958       24.61       49.22
+         LPA |      2,958       24.61       73.83
+       SLEEP |      3,145       26.17      100.00
+-------------+-----------------------------------
+       Total |     12,019      100.00
+
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 2. Create one bar chart sheet for each healt
+> h behavior"
+Step 2. Create one bar chart sheet for each health behavior
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. levelsof measureid, local(healthbr)
+`"BINGE"' `"CSMOKING"' `"LPA"' `"SLEEP"'
+
+. 
+. foreach x in `healthbr' {
+  2.         preserve
+  3.         putexcel set "$output/FAB_file.xlsx", sheet("Be
+> haviors `x'")modify
+  4.         keep if measureid == "`x'"
+  5.         
+.         gsort -data_value
+  6.         gen rank = _n
+  7.         keep if rank<=20
+  8.         
+.         graph hbar (mean) data_value, ///
+>         over(counties,sort(data_value) descending label(la
+> bsize(vsmall))) ///
+>         name(bar_`x',replace) ///
+>         title("Top 20 counties: `x'") ///
+>         ytitle("Age-adjusted prevalence(%)") ///
+>         graphregion(margin(small)) ///
+>         plotregion(margin(small))
+  9.         
+.         graph export "$output/bar_`x'.png",replace
+ 10.         
+.         putexcel A1 = "Top 20 Counties for `x'"
+ 11.         putexcel A1, bold
+ 12.         putexcel A2 = "Statistics: Age-adjusted prevale
+> nce,reproted as percentage"
+ 13.         putexcel A3 =image("$output/bar_`x'.png")
+ 14.         restore
+ 15. }
+(9,061 observations deleted)
+(2,938 observations deleted)
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//02 Output/bar_BINGE.png saved as PNG format
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+(9,061 observations deleted)
+(2,938 observations deleted)
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//02 Output/bar_CSMOKING.png saved as PNG format
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+(9,061 observations deleted)
+(2,938 observations deleted)
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//02 Output/bar_LPA.png saved as PNG format
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+(8,874 observations deleted)
+(3,125 observations deleted)
+file
+    /Users/zhaozhan/GitHub/CDC_places_county_health_portfo
+    > lio//02 Output/bar_SLEEP.png saved as PNG format
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. 
+. 
+. /* Health Outcomes */
+. /*--------------------------------------------------------
+> ------------------*/
+. * The dataset is now ready for the next step: creating the
+>  Excel Portfolio 3.
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 3. Identify counties appearing more than onc
+> e in top 20"
+Step 3. Identify counties appearing more than once in top 20
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. use "$processed/places_2025_county01.dta",clear
+
+. preserve
+
+.         keep if data_value_type == "Age-adjusted prevalenc
+> e"
+(12,019 observations deleted)
+
+. 
+.         gsort measureid -data_value 
+
+.         by measureid: gen rank = _n
+
+.         keep if rank <= 20
+(11,939 observations deleted)
+
+. 
+. 
+.         bysort counties: gen repeated_count = _N
+
+.         drop if repeated_count == 1
+(68 observations deleted)
+
+.         
+.         duplicates drop counties, force
+
+Duplicates in terms of counties
+
+(7 observations deleted)
+
+. 
+.         tempfile selected_counties
+
+.         save `selected_counties', replace
+(file
+    /var/folders/nn/d__w_mh90v5_pf425z0240rr0000gn/T//S_62
+    > 080.000006 not found)
+file
+    /var/folders/nn/d__w_mh90v5_pf425z0240rr0000gn/T//S_62
+    > 080.000006 saved as .dta format
+
+. restore
+
+. 
+. 
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 4. Determine top 5 Health Outcomes for selec
+> ted counties"
+Step 4. Determine top 5 Health Outcomes for selected countie
+> s
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. use "$processed/places_2025_county.dta",clear
+
+. 
+. egen counties = concat(locationname stateabbr), punct("-")
+
+. 
+. sort counties measureid data_value
+
+. merge m:1 counties using `selected_counties'
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       228,912
+        from master                   228,912  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                               386  (_merge==3)
+    -----------------------------------------
+
+. 
+. display "Merge result:"
+Merge result:
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |    228,912       99.83       99.83
+            Matched (3) |        386        0.17      100.00
+------------------------+-----------------------------------
+                  Total |    229,298      100.00
+
+. 
+. keep if _merge == 3     
+(228,912 observations deleted)
+
+. drop _merge
+
+. 
+. keep if category == "Health Outcomes" & ///
+>                 data_value_type == "Age-adjusted prevalenc
+> e"
+(326 observations deleted)
+
+. 
+. count
+  60
+
+. display "Health outcome records for selected counties: " r
+> (N)
+Health outcome records for selected counties: 60
+
+. 
+. gsort counties -data_value 
+
+. by counties: gen rank_top5 = _n
+
+. keep if rank_top5 <= 5
+(35 observations deleted)
+
+. 
+. bysort measure: gen outcome_frequency = _N
+
+. 
+. gen prevalence_percent= data_value
+
+. format prevalence_percent %9.1f
+
+. 
+. label variable outcome_frequency "Frequency of outcome in 
+> top 5 list"
+
+. 
+. sort counties rank_top5
+
+. 
+. keep counties rank_top5 measure measureid prevalence_perce
+> nt outcome_frequency
+
+. order counties rank_top5 measure measureid prevalence_perc
+> ent outcome_frequency
+
+. 
+. display "Final Health Outcomes table:"
+Final Health Outcomes table:
+
+. list counties rank_top5 measure prevalence_percent outcome
+> _frequency, ///
+>     sepby(counties) noobs
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |             Bullock-AL        |               1        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High blood pressure among adults                       |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             52.4          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |             Bullock-AL        |               2        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Obesity among adults                                   |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             51.0          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |             Bullock-AL        |               3        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High cholesterol among adults who have ever been scr.. |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             37.1          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |             Bullock-AL        |               4        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | All teeth lost among adults aged >=65 years            |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             35.1          |                 4          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |             Bullock-AL        |               5        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Arthritis among adults                                 |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             30.6          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |        East Carroll-LA        |               1        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High blood pressure among adults                       |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             52.5          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |        East Carroll-LA        |               2        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Obesity among adults                                   |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             51.7          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |        East Carroll-LA        |               3        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | All teeth lost among adults aged >=65 years            |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             43.5          |                 4          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |        East Carroll-LA        |               4        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High cholesterol among adults who have ever been scr.. |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             35.4          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |        East Carroll-LA        |               5        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Arthritis among adults                                 |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             30.3          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |            McDowell-WV        |               1        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Obesity among adults                                   |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             46.1          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |            McDowell-WV        |               2        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High blood pressure among adults                       |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             44.6          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |            McDowell-WV        |               3        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High cholesterol among adults who have ever been scr.. |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             37.1          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |            McDowell-WV        |               4        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Arthritis among adults                                 |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             35.1          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |            McDowell-WV        |               5        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | All teeth lost among adults aged >=65 years            |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             34.2          |                 4          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |               Mingo-WV        |               1        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Obesity among adults                                   |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             43.0          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |               Mingo-WV        |               2        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High blood pressure among adults                       |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             42.8          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |               Mingo-WV        |               3        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High cholesterol among adults who have ever been scr.. |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             37.9          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |               Mingo-WV        |               4        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Depression among adults                                |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             36.0          |                 1          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |               Mingo-WV        |               5        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Arthritis among adults                                 |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             35.0          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |                Todd-SD        |               1        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Obesity among adults                                   |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             50.2          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |                Todd-SD        |               2        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | All teeth lost among adults aged >=65 years            |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             44.5          |                 4          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |                Todd-SD        |               3        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High blood pressure among adults                       |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             41.7          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |                Todd-SD        |               4        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | Arthritis among adults                                 |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             30.1          |                 5          |
+  +--------------------------------------------------------+
+
+  +--------------------------------------------------------+
+  |               counties        |        rank_t~5        |
+  |                Todd-SD        |               5        |
+  |--------------------------------------------------------|
+  | measure                                                |
+  | High cholesterol among adults who have ever been scr.. |
+  |--------------------------------------------------------|
+  |         preval~t          |          outcom~y          |
+  |             29.7          |                 5          |
+  +--------------------------------------------------------+
+
+. 
+.         
+. display "=================================================
+> ==========="
+============================================================
+
+. display "Step 5. Export Health Outcomes table to Excel por
+> tfolio"
+Step 5. Export Health Outcomes table to Excel portfolio
+
+. display "=================================================
+> ==========="
+============================================================
+
+. 
+. export excel using "$output/FAB_file.xlsx", ///
+> sheet("Health Outcomes") firstrow(variables) sheetreplace 
+> cell(A4)
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. 
+. 
+. putexcel set "$output/FAB_file.xlsx", sheet("Health Outcom
+> es") modify
+
+. putexcel A4:F4, bold border(bottom) hcenter
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. putexcel A4 = "County" ///
+>                  B4 = "Rank" ///
+>                  C4 = "Health Outcome" ///
+>                  D4 = "Measure ID" ///
+>                  E4 = "Age-adjusted Prevalence (%)" ///
+>                  F4 = "Outcome Frequency"
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. 
+. putexcel A1 = "statistics note:"
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. putexcel B1 = "Prevalence is age-adjusted and reported as 
+> a percentage"
+file /Users/zhaozhan/GitHub/CDC_places_county_health_portfol
+> io//02 Output/FAB_file.xlsx saved
+
+. 
+. 
+. log close createlog
+      name:  createlog
+       log:  /Users/zhaozhan/GitHub/CDC_places_county_health
+> _portfolio//02 Output/createlog.log
+  log type:  text
+ closed on:   3 May 2026, 20:06:17
+------------------------------------------------------------
